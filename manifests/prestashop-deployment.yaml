@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prestashop-deployment
+  namespace: prestashop
+  labels:
+    app: prestashop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prestashop
+  template:
+    metadata:
+      labels:
+        app: prestashop
+    spec:
+      containers:
+      - name: prestashop
+        image: prestashop/prestashop:1.7
+        env:
+          - name: DB_SERVER
+            value: mysql-service
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: database_name
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: database_user
+          - name: DB_PASSWD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: database_password
+          - name: SHOP_FIRSTNAME
+            valueFrom:
+              configMapKeyRef:
+                name: shop-configmap
+                key: firstname
+          - name: SHOP_LASTNAME
+            valueFrom:
+              configMapKeyRef:
+                name: shop-configmap
+                key: lastname
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: prestashop-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: prestashop-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim

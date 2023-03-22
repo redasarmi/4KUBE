@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shop-configmap
+  namespace: prestashop
+data:
+  firstname: reda
+  lastname: sarmi
